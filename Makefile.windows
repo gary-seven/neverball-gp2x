@@ -1,0 +1,63 @@
+NAME_BALL   = neverball
+NAME_PUTT   = neverputt
+NAME_MAPC   = mapc
+O      = o
+RM     = rm -f
+CC     = gcc
+CXX    = g++
+STRIP  = strip
+
+PROG_BALL   = $(NAME_BALL)
+PROG_PUTT   = $(NAME_PUTT)
+PROG_MAPC   = $(NAME_MAPC)
+
+all: $(PROG_BALL) $(PROG_PUTT)
+
+DEFAULT_CFLAGS = `sdl-config --cflags` -DWIN32
+LDFLAGS        = `sdl-config --libs` -lz
+
+MORE_CFLAGS = -Di386 -DWINDOWS -O3 -DDATA_PREFIX=\"data\" -DUSER_PREFIX=\"./\" -ffast-math -fno-common -fno-builtin -fno-exceptions -fstrict-aliasing -O3 -march=i686 -Isrc -Isrc/share
+
+#MORE_CFLAGS += -DPROFILER
+#MORE_CFLAGS += -DAUTO_EVENTS=1000
+
+MORE_CFLAGS += -DLEVELS_HACKED
+#MORE_CFLAGS += -DNO_AUDIO
+MORE_CFLAGS += -DNO_LIGHT
+MORE_CFLAGS += -DDREAMCAST_KGL_NOT_IMPLEMENT
+MORE_CFLAGS += -DREDUCE_PHYSICS
+MORE_CFLAGS += -DUSE_DRAWELEMENTS
+#MORE_CFLAGS += -DSWAPBUFFER_THREATED
+
+CFLAGS  = $(DEFAULT_CFLAGS) $(MORE_CFLAGS) 
+CPPFLAGS  = $(DEFAULT_CFLAGS) $(MORE_CFLAGS)
+
+include objs.mk
+
+OBJS_BALL = $(SHARE_OBJS) $(BALL_OBJS)
+OBJS_PUTT = $(SHARE_OBJS) $(PUTT_OBJS)
+OBJS_MAPC = $(SHARE_OBJS) $(MAPC_OBJS)
+
+$(PROG_MAPC): $(OBJS_MAPC)
+	$(CC) -L/usr/local/lib -L/usr/lib/w32api/ -L/usr/X11R6/lib -lglu32  -lopengl32 -o $(PROG_MAPC) -lmingw32 $(OBJS_MAPC) -lopengl32 -lSDL_static_129 -lSDL_ttf_static -lGL -mwindows  -mno-cygwin -luser32 -lgdi32 -lwinmm -ldxguid -lcomctl32 -lwsock32
+	$(STRIP) $(PROG_MAPC).exe
+
+
+$(PROG_BALL): $(OBJS_BALL)
+	$(CC) -L/usr/local/lib -L/usr/lib/w32api/ -L/usr/X11R6/lib -lglu32  -lopengl32 -o $(PROG_BALL) -lmingw32 $(OBJS_BALL) -lopengl32 -lSDL_static_129 -lSDL_ttf_static -lGL -mwindows  -mno-cygwin -luser32 -lgdi32 -lwinmm -ldxguid -lcomctl32 -lwsock32
+	$(STRIP) $(PROG_BALL).exe
+
+$(PROG_PUTT): $(OBJS_PUTT)
+	$(CC) -L/usr/local/lib -L/usr/lib/w32api/ -L/usr/X11R6/lib -lglu32  -lopengl32 -o $(PROG_PUTT) -lmingw32 $(OBJS_PUTT) -lopengl32 -lSDL_static_129 -lSDL_ttf_static -lGL -mwindows  -mno-cygwin -luser32 -lgdi32 -lwinmm -ldxguid -lcomctl32 -lwsock32
+	$(STRIP) $(PROG_PUTT).exe
+
+
+
+run: $(PROG_BALL)
+	./$(PROG_BALL).exe
+
+run_putt: $(PROG_PUTT)
+	./$(PROG_PUTT).exe
+
+clean:
+	$(RM) $(PROG_BALL).exe $(PROG_PUTT).exe $(PROG_MAPC).exe $(OBJS_BALL) $(OBJS_PUTT) $(OBJS_MAPC) stdout.txt stderr.txt neverballrc neverballhs* Last

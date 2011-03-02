@@ -1,0 +1,59 @@
+TARGET_BALL = neverball
+TARGET_PUTT = neverputt
+
+KOS_CFLAGS+= -I$(KOS_BASE)/addons/include/SDL -I$(KOS_BASE)/addons/include -Isrc -Isrc/share -DDREAMCAST -DDATA_PREFIX="/cd/" -DUSER_PREFIX="/ram"
+
+#KOS_CFLAGS += -DPROFILER
+#KOS_CFLAGS += -DAUTO_EVENTS=1000
+
+#KOS_CFLAGS += -DLEVELS_HACKED
+#KOS_CFLAGS += -DNO_AUDIO
+KOS_CFLAGS += -DNO_LIGHT
+KOS_CFLAGS += -DDREAMCAST_KGL_NOT_IMPLEMENT
+KOS_CFLAGS += -DREDUCE_PHYSICS
+KOS_CFLAGS += -DUSE_DRAWELEMENTS
+KOS_CFLAGS += -DSWAPBUFFER_THREATED
+
+
+KOS_CPPFLAGS=-fno-operator-names -fno-exceptions $(KOS_CFLAGS)
+
+all: $(TARGET_BALL).bin $(TARGET_PUTT).bin
+
+include $(KOS_BASE)/Makefile.rules
+
+include objs.mk
+
+OBJS_BALL= $(SHARE_OBJS) $(BALL_OBJS)
+OBJS_PUTT= $(SHARE_OBJS) $(PUTT_OBJS)
+
+clean:
+	rm -f $(OBJS_BALL) $(OBJS_PUTT) $(TARGET_BALL).elf $(TARGET_BALL).bin $(TARGET_PUTT).elf $(TARGET_PUTT).bin data.iso
+
+$(TARGET_BALL).elf: $(OBJS_BALL)
+	$(KOS_CC) $(KOS_CFLAGS) $(KOS_LDFLAGS) -o $(TARGET_BALL).elf $(KOS_START) \
+	$(OBJS_BALL) $(OBJEXTRA)  -lSDL_mixer_126 -lSDL_image_124 -lSDL_gl_129 -lkglx -lSDL_ttf -lfreetype -lpng_128 -lz_123 -lm $(KOS_LIBS)
+
+$(TARGET_BALL).bin: $(TARGET_BALL).elf
+	$(KOS_OBJCOPY) -R .stack -O binary $(TARGET_BALL).elf $(TARGET_BALL).bin
+
+$(TARGET_PUTT).elf: $(OBJS_PUTT)
+	$(KOS_CC) $(KOS_CFLAGS) $(KOS_LDFLAGS) -o $(TARGET_PUTT).elf $(KOS_START) \
+	$(OBJS_PUTT) $(OBJEXTRA)  -lSDL_mixer_126 -lSDL_image_124 -lSDL_gl_129 -lkglx -lSDL_ttf -lfreetype -lpng_128 -lz_123 -lm $(KOS_LIBS)
+
+$(TARGET_PUTT).bin: $(TARGET_PUTT).elf
+	$(KOS_OBJCOPY) -R .stack -O binary $(TARGET_PUTT).elf $(TARGET_PUTT).bin
+
+
+data.iso: data
+	mkisofs -joliet-long -l -o data.iso -graft-points /=data/
+
+
+run: $(TARGET_BALL).bin data.iso
+	$(KOS_LOADER) $(TARGET_BALL).bin -i data.iso
+#	$(KOS_LOADER) $(TARGET_BALL).bin
+
+run_putt: $(TARGET_PUTT).bin data.iso
+	$(KOS_LOADER) $(TARGET_PUTT).bin -i data.iso
+#	$(KOS_LOADER) $(TARGET_PUTT).bin
+
+
