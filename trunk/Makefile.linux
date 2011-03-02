@@ -1,0 +1,62 @@
+NAME_BALL   = neverball
+NAME_PUTT   = neverputt
+NAME_MAPC   = mapc
+O      = o
+RM     = rm -f
+CC     = gcc-3.4
+CXX    = g++-3.4
+STRIP  = strip
+
+PROG_BALL   = $(NAME_BALL)
+PROG_PUTT   = $(NAME_PUTT)
+PROG_MAPC   = $(NAME_MAPC)
+
+all: $(PROG_BALL) $(PROG_PUTT)
+
+DEFAULT_CFLAGS = `sdl-config --cflags`
+LDFLAGS        = `sdl-config --libs` -lSDL_image -lSDL_ttf -lSDL_mixer -lfreetype -lz -lGL -lm
+
+MORE_CFLAGS = -Di386 -O3 -DDATA_PREFIX=\"data\" -DUSER_PREFIX=\"/tmp\" -ffast-math -fno-common -fno-builtin -fno-exceptions -fstrict-aliasing -O3 -march=i686 -Isrc -Isrc/share
+
+#MORE_CFLAGS += -DPROFILER
+#MORE_CFLAGS += -DAUTO_EVENTS=1000
+
+MORE_CFLAGS += -DLEVELS_HACKED
+MORE_CFLAGS += -DNO_AUDIO
+MORE_CFLAGS += -DNO_LIGHT
+MORE_CFLAGS += -DDREAMCAST_KGL_NOT_IMPLEMENT
+MORE_CFLAGS += -DREDUCE_PHYSICS
+MORE_CFLAGS += -DUSE_DRAWELEMENTS
+#MORE_CFLAGS += -DSWAPBUFFER_THREATED
+
+#MORE_CFLAGS += -DDEBUG_AUDIO
+
+CFLAGS  = $(DEFAULT_CFLAGS) $(MORE_CFLAGS)
+CPPFLAGS  = $(CFLAGS)
+
+include objs.mk
+
+OBJS_BALL = ${SHARE_OBJS} ${BALL_OBJS}
+OBJS_PUTT = ${SHARE_OBJS} ${PUTT_OBJS}
+OBJS_MAPC = ${SHARE_OBJS} ${MAPC_OBJS}
+
+$(PROG_MAPC): $(OBJS_MAPC)
+	$(CC) $(CFLAGS) -o $(PROG_MAPC) $(OBJS_MAPC) $(LDFLAGS)
+	$(STRIP) $(PROG_MAPC)
+
+$(PROG_BALL): $(OBJS_BALL) 
+	$(CC) $(CFLAGS) -o $(PROG_BALL) $(OBJS_BALL) $(LDFLAGS)
+	$(STRIP) $(PROG_BALL)
+
+$(PROG_PUTT): $(OBJS_PUTT) 
+	$(CC) $(CFLAGS) -o $(PROG_PUTT) $(OBJS_PUTT) $(LDFLAGS)
+	$(STRIP) $(PROG_PUTT)
+
+run: $(PROG_BALL)
+	./$(PROG_BALL)
+
+run_putt: $(PROG_PUTT)
+	./$(PROG_PUTT)
+
+clean:
+	$(RM) $(PROG_PUTT) $(PROG_BALL) $(PROG_MAPC) $(OBJS_BALL) $(OBJS_PUTT)  $(OBJS_MAPC)
