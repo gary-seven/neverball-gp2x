@@ -1,0 +1,1 @@
+Port of Neverball to the GP2X WiZ & Caanoo. Needs to run on ARM architecture under embedded Linux, using OpenGL ES.
